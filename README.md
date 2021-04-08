@@ -22,9 +22,9 @@ Install peer dependencies (or not, if you already have them - if you are using N
 
 ## Installation
 
-`yarn add git+https://github.com/leocode/sequential-events.git`
+`yarn add @leocode/sequential-events`
 
-`npm install --save git+https://github.com/leocode/sequential-events.git`
+`npm install --save @leocode/sequential-events`
 
 ## Usage
 
