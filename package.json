@@ -1,9 +1,13 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "@leocode/sequential-events",
+  "author": "Leocode",
+  "license": "MIT",
+  "repository": "https://github.com/leocode/sequential-events",
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
+  "types": "./build/index.d.ts",
   "main": "./build/index.js",
   "peerDependencies": {
     "@nestjs/common": "^7.6.13",
