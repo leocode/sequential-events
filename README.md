@@ -98,7 +98,7 @@ export class TenantService {
     const user = await this.createUser(..., transaction);
 
     await this.sequentialEventBus.publishAll([
-      new CreateOnboarding(tenantId)
+      new TenantCreated(tenantId)
     ], transaction);
 
     return user;
