@@ -1,8 +1,8 @@
-import { Module, OnApplicationBootstrap } from '@nestjs/common';
-import { ModulesContainer, ModuleRef } from '@nestjs/core';
-import { SEQUENTIAL_EVENT_LISTENER } from './decorators/SequentialEventListener';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ModuleRef, ModulesContainer } from '@nestjs/core';
+import { getListenedEvent } from './decorators/SequentialEventListener';
 import { SequentialEventBus } from './SequentialEventBus';
-import { isEvent } from './ISequentialEventListener';
 
 interface ListenerDefinition {
   providerConstructor: any;
@@ -21,30 +21,29 @@ export class SequentialEventsModule implements OnApplicationBootstrap {
   ) {}
 
   public onApplicationBootstrap() {
-    const modules = [...this.modulesContainer.values()];
-    const listenerDefinitions = modules.flatMap(module => {
-      const providers = [...module.providers.values()];
-      const listeners = providers.map(provider => {
-        const instance: any = provider.instance;
-        if (!instance || !instance.constructor) {
-          return undefined;
-        }
-        const listenedEvent = Reflect.getMetadata(SEQUENTIAL_EVENT_LISTENER, instance.constructor);
-        if (!listenedEvent && isEvent(listenedEvent) === false) {
-          return undefined;
-        }
-        return { providerConstructor: instance.constructor, eventType: listenedEvent.type };
+    const listenerDefinitions = [...this.modulesContainer.values()]
+      .flatMap((module) => [...module.providers.values()])
+      .filter((provider) => (provider.instance as any)?.constructor)
+      .filter((provider) =>
+        getListenedEvent((provider.instance as any).constructor),
+      )
+      .map((provider) => {
+        const instance = provider.instance as any;
+
+        const listenedEvent = getListenedEvent(instance.constructor)!;
+
+        return {
+          providerConstructor: instance.constructor,
+          eventType: listenedEvent.type,
+        } as ListenerDefinition;
       });
-      return listeners.filter(Boolean);
-    }) as ListenerDefinition[];
 
-    const listenerParis = listenerDefinitions.map(definition => {
-      const instance = this.moduleRef.get(definition.providerConstructor, { strict: false });
-      return { listener: instance, eventType: definition.eventType };
-    });
+    listenerDefinitions.forEach((definition) => {
+      const instance = this.moduleRef.get(definition.providerConstructor, {
+        strict: false,
+      });
 
-    listenerParis.forEach(pair => {
-      this.eventBus.register(pair.listener, pair.eventType);
+      this.eventBus.register(instance, definition.eventType);
     });
   }
 }

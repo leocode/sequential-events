@@ -1,0 +1,33 @@
+name: Test
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - name: Cache
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+      - name: Install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn lint
+      - name: Build
+        run: yarn build
+      - name: Run unit tests
+        run: yarn test
