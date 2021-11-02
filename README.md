@@ -36,19 +36,12 @@ Install peer dependencies (or not, if you already have them - if you are using N
 
 ### Creating event
 
-Event needs to implement interface:
+Event needs to implement interface `IEvent` and it should be a class:
 
 ```ts
-export interface IEvent {
-  type: string;
-}
-```
+import { IEvent } from '@leocode/sequential-events';
 
-Therefore it may be any class:
-
-```ts
-export class TenantCreated {
-  public type = 'TenantCreated';
+export class TenantCreated implements IEvent {
 
   constructor (public tenantId: string) {};
 }
@@ -63,7 +56,7 @@ import { SequentialEventListener } from '@leocode/sequential-events';
 import { ISequentialEventListener } from '@leocode/sequential-events';
 
 @SequentialEventListener(TenantCreated)
-export class CreateOnboarding implements ISequentialEventListener {
+export class CreateOnboarding implements ISequentialEventListener<TenantCreated, Transaction> {
   public constructor(
     private onboardingFacade: OnboardingFacade,
   ) {}

@@ -6,7 +6,7 @@ import { SequentialEventBus } from './SequentialEventBus';
 
 interface ListenerDefinition {
   providerConstructor: any;
-  eventType: any;
+  eventConstructor: any;
 }
 
 @Module({
@@ -34,7 +34,7 @@ export class SequentialEventsModule implements OnApplicationBootstrap {
 
         return {
           providerConstructor: instance.constructor,
-          eventType: listenedEvent.type,
+          eventConstructor: listenedEvent,
         } as ListenerDefinition;
       });
 
@@ -43,7 +43,7 @@ export class SequentialEventsModule implements OnApplicationBootstrap {
         strict: false,
       });
 
-      this.eventBus.register(instance, definition.eventType);
+      this.eventBus.register(instance, definition.eventConstructor);
     });
   }
 }

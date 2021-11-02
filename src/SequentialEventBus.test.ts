@@ -1,8 +1,10 @@
 import { SequentialEventBus } from './SequentialEventBus';
 import type { IEvent } from './ISequentialEventListener';
 
-const EVENT_TYPE = 'eventType';
-const EVENT: IEvent = { type: 'eventType' };
+class EVENT implements IEvent {
+  public payload = 'test';
+}
+
 const tx = { someContent: 'content' };
 
 describe('SequentialEventBus', () => {
@@ -16,24 +18,26 @@ describe('SequentialEventBus', () => {
     it('should publish event to registered handler', () => {
       const handleFunctionMock = jest.fn();
       const handler = { handle: handleFunctionMock };
-      eventBus.register(handler, EVENT_TYPE);
+      eventBus.register(handler, EVENT);
 
-      eventBus.publish(EVENT, tx);
+      const instance = new EVENT();
+      eventBus.publish(instance, tx);
 
       expect(handleFunctionMock).toBeCalledTimes(1);
-      expect(handleFunctionMock).toBeCalledWith(EVENT, tx);
+      expect(handleFunctionMock).toBeCalledWith(instance, tx);
     });
 
     it('should publish event to multiple handlers', () => {
       const handleFunctionMock = jest.fn();
       const handler = { handle: handleFunctionMock };
-      eventBus.register(handler, EVENT_TYPE);
-      eventBus.register(handler, EVENT_TYPE);
+      eventBus.register(handler, EVENT);
+      eventBus.register(handler, EVENT);
 
-      eventBus.publish(EVENT, tx);
+      const instance = new EVENT();
+      eventBus.publish(instance, tx);
 
       expect(handleFunctionMock).toBeCalledTimes(2);
-      expect(handleFunctionMock).toBeCalledWith(EVENT, tx);
+      expect(handleFunctionMock).toBeCalledWith(instance, tx);
     });
 
     it('should publish event with no handlers registered', () => {
@@ -44,38 +48,40 @@ describe('SequentialEventBus', () => {
     it('should publish multiple events of the same type', () => {
       const handleFunctionMock = jest.fn();
       const handler = { handle: handleFunctionMock };
-      eventBus.register(handler, EVENT_TYPE);
-
-      eventBus.publishAll([EVENT, EVENT, EVENT], tx);
+      eventBus.register(handler, EVENT);
+      
+      const instance = new EVENT();
+      eventBus.publishAll([instance, instance, instance], tx);
 
       expect(handleFunctionMock).toBeCalledTimes(3);
-      expect(handleFunctionMock).toBeCalledWith(EVENT, tx);
+      expect(handleFunctionMock).toBeCalledWith(instance, tx);
     });
 
     it('should publish multiple events of the same type to multiple handlers', () => {
       const handleFunctionMock = jest.fn();
       const handler = { handle: handleFunctionMock };
-      eventBus.register(handler, EVENT_TYPE);
-      eventBus.register(handler, EVENT_TYPE);
+      eventBus.register(handler, EVENT);
+      eventBus.register(handler, EVENT);
 
-      eventBus.publishAll([EVENT, EVENT, EVENT], tx);
+      const instance = new EVENT();
+      eventBus.publishAll([instance, instance, instance], tx);
 
       expect(handleFunctionMock).toBeCalledTimes(6);
-      expect(handleFunctionMock).toBeCalledWith(EVENT, tx);
+      expect(handleFunctionMock).toBeCalledWith(instance, tx);
     });
 
     it('should publish different events to multiple handlers', () => {
       const firstHandle = jest.fn();
-      const firstEventName = 'firstEvent';
-      const firstEvent = { type: firstEventName };
+      class FirstEvent implements IEvent {}
 
       const secondHandle = jest.fn();
-      const secondEventName = 'secondEvent';
-      const secondEvent = { type: secondEventName };
+      class SecondEvent implements IEvent {}
 
-      eventBus.register({ handle: firstHandle }, firstEventName);
-      eventBus.register({ handle: secondHandle }, secondEventName);
+      eventBus.register({ handle: firstHandle }, FirstEvent);
+      eventBus.register({ handle: secondHandle }, SecondEvent);
 
+      const firstEvent = new FirstEvent();
+      const secondEvent = new SecondEvent();
       eventBus.publishAll([firstEvent, firstEvent, secondEvent], tx);
 
       expect(firstHandle).toBeCalledTimes(2);
