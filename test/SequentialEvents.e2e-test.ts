@@ -9,7 +9,7 @@ import {
 describe('SequentialEvents', () => {
   let app: INestApplication;
 
-  it.only('should publish event to listener present in module', async () => {
+  it('should publish event to listener present in module', async () => {
     const handler = jest.fn();
     app = await createTestApp([
       { provider: TestEventListener, mock: new TestEventListener(handler) },
