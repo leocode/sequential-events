@@ -48,7 +48,7 @@ Therefore it may be any class:
 
 ```ts
 export class TenantCreated {
-  public static type = 'TenantCreated';
+  public type = 'TenantCreated';
 
   constructor (public tenantId: string) {};
 }
