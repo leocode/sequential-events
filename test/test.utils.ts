@@ -5,13 +5,12 @@ import type {
 import { SequentialEventListener, SequentialEventsModule } from '../src';
 import { Test } from '@nestjs/testing';
 
-export const TestEvent: IEvent = {
-  type: 'TestEvent',
+export class TestEvent implements IEvent {
+  public payload = 'test';
 };
-export const EVENT_CONTENT = {};
 
 @SequentialEventListener(TestEvent)
-export class TestEventListener implements ISequentialEventListener {
+export class TestEventListener implements ISequentialEventListener<TestEvent>{
   constructor(private readonly mockFunction: jest.Mock) {}
 
   public async handle(

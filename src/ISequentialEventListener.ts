@@ -1,11 +1,7 @@
-export interface IEvent {
-  type: string;
-}
+export interface IEvent {}
 
-export function isEvent(e: any): e is IEvent {
-  return Boolean(e && e.type !== undefined);
-}
+export type IEventConstructor = { new(...args: any[]): IEvent; }
 
-export interface ISequentialEventListener<E extends IEvent = IEvent> {
-  handle(event: E, tx: object | null): Promise<void>;
+export interface ISequentialEventListener<E extends IEvent = IEvent, T = any> {
+  handle(event: E, tx: T | null): Promise<void>;
 }
