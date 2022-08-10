@@ -1,9 +1,9 @@
-import type { IEvent, ISequentialEventListener } from './ISequentialEventListener';
+import type { EventId, IEvent, ISequentialEventListener } from './ISequentialEventListener';
 import type { Type } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { SEQUENTIAL_EVENT, SEQUENTIAL_EVENT_LISTENER } from './constants';
-import 'reflect-metadata';
 import { Injectable } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { EventMetadata } from './metadata/EventMetadata';
+import { EventListenerMetadata } from './metadata/EventListenerMetadata';
 
 /**
  * The main difference from the Nest EventBus is that event handlers must finish its work to proceed.
@@ -12,25 +12,23 @@ import { Injectable } from '@nestjs/common';
  */
 @Injectable()
 export class SequentialEventBus {
-  private listeners: Map<string, ISequentialEventListener[]> = new Map();
+  private eventListeners: Map<EventId, ISequentialEventListener[]> = new Map();
 
   constructor(public moduleRef: ModuleRef) {
   }
 
-  public register(handler: ISequentialEventListener<any>, id: string) {
-    if (!this.listeners.has(id)) {
-      this.listeners.set(id, []);
+  public register(handler: ISequentialEventListener<any>, eventId: EventId) {
+    if (!this.eventListeners.has(eventId)) {
+      this.eventListeners.set(eventId, []);
     }
 
-        this.listeners.get(id)!.push(handler);
+    this.eventListeners.get(eventId)!.push(handler);
   }
 
   public async publish(event: IEvent, tx: object | null): Promise<void> {
-    const eventCtor = Object.getPrototypeOf(event).constructor;
-    const eventMetadata = Reflect.getMetadata(SEQUENTIAL_EVENT, eventCtor);
-    const eventId = eventMetadata?.id;
+    const eventId = EventMetadata.from(event).getEventId();
 
-    const listeners = this.listeners.get(eventId);
+    const listeners = this.eventListeners.get(eventId);
 
     if (listeners) {
       await Promise.all(listeners.map(async listener => {
@@ -44,24 +42,20 @@ export class SequentialEventBus {
   }
 
   public bindListeners(eventListeners: Type<ISequentialEventListener>[]) {
-    eventListeners.forEach((handler) => {
-      const instance = this.moduleRef.get(handler, { strict: false });
-      if (!instance) {
+    eventListeners.forEach((eventListener) => {
+      const resolvedInstance = this.moduleRef.get(eventListener, { strict: false });
+      if (!resolvedInstance) {
         return;
       }
-      const events = SequentialEventBus.reflectEvents(handler);
+
+      const events = EventListenerMetadata.from(eventListener).getEvents();
+
       events.map((event) =>
         this.register(
-          instance,
-          Reflect.getMetadata(SEQUENTIAL_EVENT, event).id,
+          resolvedInstance,
+          EventMetadata.from(event).getEventId(),
         ),
       );
     });
-  }
-
-  private static reflectEvents(
-    handler: Type<ISequentialEventListener>,
-  ): FunctionConstructor[] {
-    return Reflect.getMetadata(SEQUENTIAL_EVENT_LISTENER, handler);
   }
 }

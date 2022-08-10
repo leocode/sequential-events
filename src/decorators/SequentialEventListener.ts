@@ -1,16 +1,16 @@
-import type { IEvent } from '../ISequentialEventListener';
+import type { IEvent, ISequentialEventListener } from '../ISequentialEventListener';
 import 'reflect-metadata';
+import { EventMetadata } from '../metadata/EventMetadata';
 import { randomUUID } from 'crypto';
-import { SEQUENTIAL_EVENT, SEQUENTIAL_EVENT_LISTENER } from '../constants';
+import { EventListenerMetadata } from '../metadata/EventListenerMetadata';
+import type { Type } from '@nestjs/common';
 
 export const SequentialEventListener = (...events: IEvent[]): ClassDecorator => {
   return (target: object) => {
     events.forEach((event) => {
-      if (!Reflect.hasOwnMetadata(SEQUENTIAL_EVENT, event)) {
-        Reflect.defineMetadata(SEQUENTIAL_EVENT, { id: randomUUID() }, event);
-      }
+      EventMetadata.from(event).assignId(randomUUID());
     });
 
-    Reflect.defineMetadata(SEQUENTIAL_EVENT_LISTENER, events, target);
+    EventListenerMetadata.from(target as Type<ISequentialEventListener>).assignEvents(events);
   };
 };

@@ -1,6 +1,6 @@
-import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import type { OnApplicationBootstrap } from '@nestjs/common';
 import { Module } from '@nestjs/common';
-import { ModuleRef, ModulesContainer } from '@nestjs/core';
+import { ModulesContainer } from '@nestjs/core';
 import { SequentialEventBus } from './SequentialEventBus';
 import { SequentialEventListenersFinder } from './SequentialEventListenersFinder';
 
@@ -8,17 +8,17 @@ import { SequentialEventListenersFinder } from './SequentialEventListenersFinder
   providers: [SequentialEventBus, SequentialEventListenersFinder],
   exports: [SequentialEventBus],
 })
-export class SequentialEventsModule implements OnModuleInit {
+export class SequentialEventsModule implements OnApplicationBootstrap {
   public constructor(
         private readonly eventBus: SequentialEventBus,
         private readonly modulesContainer: ModulesContainer,
-        private readonly sequentialEventExplorer: SequentialEventListenersFinder,
+        private readonly sequentialEventListenersFinder: SequentialEventListenersFinder,
   ) {
   }
 
-  public onModuleInit() {
+  public onApplicationBootstrap() {
     const modules = [...this.modulesContainer.values()];
-    const eventListeners = this.sequentialEventExplorer.search(modules);
+    const eventListeners = this.sequentialEventListenersFinder.search(modules);
     this.eventBus.bindListeners(eventListeners);
   }
 

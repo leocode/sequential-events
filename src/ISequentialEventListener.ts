@@ -1,6 +1,8 @@
 export interface IEvent {
 }
 
-export interface ISequentialEventListener<E extends IEvent = IEvent, T = any> {
-    handle(event: E, tx: T | null): Promise<void>;
+export type EventId = string;
+
+export interface ISequentialEventListener<Event extends IEvent = IEvent, Transaction = any> {
+    handle(event: Event, tx: Transaction | null): Promise<void>;
 }

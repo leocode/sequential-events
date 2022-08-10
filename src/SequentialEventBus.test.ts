@@ -1,6 +1,6 @@
 import { SequentialEventBus } from './SequentialEventBus';
 import type { IEvent } from './ISequentialEventListener';
-import { SEQUENTIAL_EVENT } from './constants';
+import { SEQUENTIAL_EVENT } from './metadata/EventMetadata';
 
 class EVENT implements IEvent {
   public payload = 'test';
