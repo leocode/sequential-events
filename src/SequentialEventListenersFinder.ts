@@ -1,9 +1,9 @@
-import type {ISequentialEventListener} from './ISequentialEventListener';
-import type {Type} from '@nestjs/common';
-import type {InstanceWrapper} from '@nestjs/core/injector/instance-wrapper';
-import type {Module as ModuleType} from '@nestjs/core/injector/module';
-import {SEQUENTIAL_EVENT_LISTENER} from './constants';
-import {Injectable} from '@nestjs/common';
+import type { ISequentialEventListener } from './ISequentialEventListener';
+import type { Type } from '@nestjs/common';
+import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
+import type { Module as ModuleType } from '@nestjs/core/injector/module';
+import { SEQUENTIAL_EVENT_LISTENER } from './constants';
+import { Injectable } from '@nestjs/common';
 
 /*
 * Implementation based on https://github.com/nestjs/cqrs/blob/master/src/services/explorer.service.ts
@@ -30,7 +30,7 @@ export class SequentialEventListenersFinder {
     wrapper: InstanceWrapper,
     metadataKey: string,
   ): Type | undefined {
-    const {instance} = wrapper;
+    const { instance } = wrapper;
     if (!instance) {
       return undefined;
     }

@@ -1,18 +1,18 @@
-import {SequentialEventBus} from './SequentialEventBus';
-import type {IEvent} from './ISequentialEventListener';
-import {SEQUENTIAL_EVENT} from './constants';
+import { SequentialEventBus } from './SequentialEventBus';
+import type { IEvent } from './ISequentialEventListener';
+import { SEQUENTIAL_EVENT } from './constants';
 
 class EVENT implements IEvent {
   public payload = 'test';
 }
 
-const tx = {someContent: 'content'};
+const tx = { someContent: 'content' };
 
 const createEvent = (event: any) => {
   const eventId = event.constructor.name;
-  Reflect.defineMetadata(SEQUENTIAL_EVENT, {id: eventId}, event.constructor);
+  Reflect.defineMetadata(SEQUENTIAL_EVENT, { id: eventId }, event.constructor);
 
-  return {event, eventId};
+  return { event, eventId };
 };
 
 describe('SequentialEventBus', () => {
@@ -25,8 +25,8 @@ describe('SequentialEventBus', () => {
   describe('#publish', () => {
     it('should publish event to registered handler', () => {
       const handleFunctionMock = jest.fn();
-      const handler = {handle: handleFunctionMock};
-      const {event, eventId} = createEvent(new EVENT());
+      const handler = { handle: handleFunctionMock };
+      const { event, eventId } = createEvent(new EVENT());
       eventBus.register(handler, eventId);
 
       eventBus.publish(event, tx);
@@ -37,8 +37,8 @@ describe('SequentialEventBus', () => {
 
     it('should publish event to multiple handlers', () => {
       const handleFunctionMock = jest.fn();
-      const handler = {handle: handleFunctionMock};
-      const {event, eventId} = createEvent(new EVENT());
+      const handler = { handle: handleFunctionMock };
+      const { event, eventId } = createEvent(new EVENT());
       eventBus.register(handler, eventId);
       eventBus.register(handler, eventId);
 
@@ -49,7 +49,7 @@ describe('SequentialEventBus', () => {
     });
 
     it('should publish event with no handlers registered', () => {
-      const {event} = createEvent(new EVENT());
+      const { event } = createEvent(new EVENT());
 
       eventBus.publish(event, tx);
     });
@@ -57,8 +57,8 @@ describe('SequentialEventBus', () => {
   describe('#publishAll', () => {
     it('should publish multiple events of the same type', () => {
       const handleFunctionMock = jest.fn();
-      const handler = {handle: handleFunctionMock};
-      const {event, eventId} = createEvent(new EVENT());
+      const handler = { handle: handleFunctionMock };
+      const { event, eventId } = createEvent(new EVENT());
       eventBus.register(handler, eventId);
 
       eventBus.publishAll([event, event, event], tx);
@@ -69,8 +69,8 @@ describe('SequentialEventBus', () => {
 
     it('should publish multiple events of the same type to multiple handlers', () => {
       const handleFunctionMock = jest.fn();
-      const handler = {handle: handleFunctionMock};
-      const {event, eventId} = createEvent(new EVENT());
+      const handler = { handle: handleFunctionMock };
+      const { event, eventId } = createEvent(new EVENT());
       eventBus.register(handler, eventId);
       eventBus.register(handler, eventId);
 
@@ -86,17 +86,17 @@ describe('SequentialEventBus', () => {
       class FirstEvent implements IEvent {
       }
 
-      const {eventId: firstEventId, event: firstEvent} = createEvent(new FirstEvent());
+      const { eventId: firstEventId, event: firstEvent } = createEvent(new FirstEvent());
 
       const secondHandle = jest.fn();
 
       class SecondEvent implements IEvent {
       }
 
-      const {eventId: secondEventId, event: secondEvent} = createEvent(new SecondEvent());
+      const { eventId: secondEventId, event: secondEvent } = createEvent(new SecondEvent());
 
-      eventBus.register({handle: firstHandle}, firstEventId);
-      eventBus.register({handle: secondHandle}, secondEventId);
+      eventBus.register({ handle: firstHandle }, firstEventId);
+      eventBus.register({ handle: secondHandle }, secondEventId);
 
       eventBus.publishAll([firstEvent, firstEvent, secondEvent], tx);
 

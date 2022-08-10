@@ -1,8 +1,8 @@
-import type {OnApplicationBootstrap, OnModuleInit} from '@nestjs/common';
-import {Module} from '@nestjs/common';
-import {ModuleRef, ModulesContainer} from '@nestjs/core';
-import {SequentialEventBus} from './SequentialEventBus';
-import {SequentialEventListenersFinder} from './SequentialEventListenersFinder';
+import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ModuleRef, ModulesContainer } from '@nestjs/core';
+import { SequentialEventBus } from './SequentialEventBus';
+import { SequentialEventListenersFinder } from './SequentialEventListenersFinder';
 
 @Module({
   providers: [SequentialEventBus, SequentialEventListenersFinder],

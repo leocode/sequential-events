@@ -1,9 +1,9 @@
-import type {IEvent, ISequentialEventListener} from './ISequentialEventListener';
-import type {Type} from '@nestjs/common';
-import {ModuleRef} from '@nestjs/core';
-import {SEQUENTIAL_EVENT, SEQUENTIAL_EVENT_LISTENER} from './constants';
+import type { IEvent, ISequentialEventListener } from './ISequentialEventListener';
+import type { Type } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { SEQUENTIAL_EVENT, SEQUENTIAL_EVENT_LISTENER } from './constants';
 import 'reflect-metadata';
-import {Injectable} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 /**
  * The main difference from the Nest EventBus is that event handlers must finish its work to proceed.
@@ -22,7 +22,7 @@ export class SequentialEventBus {
       this.listeners.set(id, []);
     }
 
-    this.listeners.get(id)!.push(handler);
+        this.listeners.get(id)!.push(handler);
   }
 
   public async publish(event: IEvent, tx: object | null): Promise<void> {
@@ -45,7 +45,7 @@ export class SequentialEventBus {
 
   public bindListeners(eventListeners: Type<ISequentialEventListener>[]) {
     eventListeners.forEach((handler) => {
-      const instance = this.moduleRef.get(handler, {strict: false});
+      const instance = this.moduleRef.get(handler, { strict: false });
       if (!instance) {
         return;
       }
