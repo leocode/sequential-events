@@ -1,16 +1,28 @@
-import type {
-  IEvent,
-  ISequentialEventListener,
-} from '../src/ISequentialEventListener';
-import { SequentialEventListener, SequentialEventsModule } from '../src';
-import { Test } from '@nestjs/testing';
+import type {IEvent, ISequentialEventListener} from '../src/ISequentialEventListener';
+import {SequentialEventListener, SequentialEventsModule} from '../src';
+import {Test} from '@nestjs/testing';
 
 export class TestEvent implements IEvent {
   public payload = 'test';
-};
+}
+export class OtherTestEvent implements IEvent {
+  public payload = 'other_test';
+}
 
 @SequentialEventListener(TestEvent)
 export class TestEventListener implements ISequentialEventListener<TestEvent>{
+  constructor(private readonly mockFunction: jest.Mock) {}
+
+  public async handle(
+    event: IEvent,
+    tx: Record<string, unknown>,
+  ): Promise<void> {
+    this.mockFunction(event, tx);
+  }
+}
+
+@SequentialEventListener(TestEvent, OtherTestEvent)
+export class TestTwoEventsListener implements ISequentialEventListener<TestEvent>{
   constructor(private readonly mockFunction: jest.Mock) {}
 
   public async handle(

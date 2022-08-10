@@ -1,21 +1,16 @@
-import type { IEventConstructor } from '../ISequentialEventListener';
+import type {IEvent} from '../ISequentialEventListener';
 import 'reflect-metadata';
+import {randomUUID} from 'crypto';
+import {SEQUENTIAL_EVENT, SEQUENTIAL_EVENT_LISTENER} from '../constants';
 
-export const SEQUENTIAL_EVENT_LISTENER = '__sequentialEventListener';
-
-export const SequentialEventListener = (event: IEventConstructor): ClassDecorator => {
+export const SequentialEventListener = (...events: IEvent[]): ClassDecorator => {
   return (target: object) => {
-    Reflect.defineMetadata(SEQUENTIAL_EVENT_LISTENER, event, target);
+    events.forEach((event) => {
+      if (!Reflect.hasOwnMetadata(SEQUENTIAL_EVENT, event)) {
+        Reflect.defineMetadata(SEQUENTIAL_EVENT, {id: randomUUID()}, event);
+      }
+    });
+
+    Reflect.defineMetadata(SEQUENTIAL_EVENT_LISTENER, events, target);
   };
-};
-
-export const getListenedEvent = (
-  constructor: Record<string, unknown>,
-): IEventConstructor | undefined => {
-  const listenedEvent = Reflect.getMetadata(
-    SEQUENTIAL_EVENT_LISTENER,
-    constructor,
-  );
-
-  return listenedEvent ?? undefined;
 };
