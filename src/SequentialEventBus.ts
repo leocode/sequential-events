@@ -1,23 +1,34 @@
-import { ISequentialEventListener, IEvent, IEventConstructor } from './ISequentialEventListener';
+import type { EventId, IEvent, ISequentialEventListener } from './ISequentialEventListener';
+import type { Type } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { EventMetadata } from './metadata/EventMetadata';
+import { EventListenerMetadata } from './metadata/EventListenerMetadata';
 
 /**
  * The main difference from the Nest EventBus is that event handlers must finish its work to proceed.
+ *
+ * Implementation for binding events based on https://github.com/nestjs/cqrs/blob/master/src/event-bus.ts
  */
+@Injectable()
 export class SequentialEventBus {
-  private listeners: Map<IEventConstructor, ISequentialEventListener[]> = new Map();
+  private eventListeners: Map<EventId, ISequentialEventListener[]> = new Map();
 
-  public register(handler: ISequentialEventListener<any>, eventCtor: IEventConstructor) {
-    if (!this.listeners.has(eventCtor)) {
-      this.listeners.set(eventCtor, []);
+  constructor(public moduleRef: ModuleRef) {
+  }
+
+  public register(handler: ISequentialEventListener<any>, eventId: EventId) {
+    if (!this.eventListeners.has(eventId)) {
+      this.eventListeners.set(eventId, []);
     }
 
-    this.listeners.get(eventCtor)!.push(handler);
+    this.eventListeners.get(eventId)!.push(handler);
   }
 
   public async publish(event: IEvent, tx: object | null): Promise<void> {
-    const eventCtor = Object.getPrototypeOf(event).constructor;
+    const eventId = EventMetadata.from(event).getEventId();
 
-    const listeners = this.listeners.get(eventCtor);
+    const listeners = this.eventListeners.get(eventId);
 
     if (listeners) {
       await Promise.all(listeners.map(async listener => {
@@ -28,5 +39,23 @@ export class SequentialEventBus {
 
   public async publishAll(events: IEvent[], tx: object | null): Promise<void> {
     await Promise.all(events.map(async event => await this.publish(event, tx)));
+  }
+
+  public bindListeners(eventListeners: Type<ISequentialEventListener>[]) {
+    eventListeners.forEach((eventListener) => {
+      const resolvedInstance = this.moduleRef.get(eventListener, { strict: false });
+      if (!resolvedInstance) {
+        return;
+      }
+
+      const events = EventListenerMetadata.from(eventListener).getEvents();
+
+      events.map((event) =>
+        this.register(
+          resolvedInstance,
+          EventMetadata.from(event).getEventId(),
+        ),
+      );
+    });
   }
 }

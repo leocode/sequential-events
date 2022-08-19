@@ -1,21 +1,16 @@
-import type { IEventConstructor } from '../ISequentialEventListener';
+import type { IEvent, ISequentialEventListener } from '../ISequentialEventListener';
 import 'reflect-metadata';
+import { EventMetadata } from '../metadata/EventMetadata';
+import { randomUUID } from 'crypto';
+import { EventListenerMetadata } from '../metadata/EventListenerMetadata';
+import type { Type } from '@nestjs/common';
 
-export const SEQUENTIAL_EVENT_LISTENER = '__sequentialEventListener';
-
-export const SequentialEventListener = (event: IEventConstructor): ClassDecorator => {
+export const SequentialEventListener = (...events: IEvent[]): ClassDecorator => {
   return (target: object) => {
-    Reflect.defineMetadata(SEQUENTIAL_EVENT_LISTENER, event, target);
+    events.forEach((event) => {
+      EventMetadata.from(event).assignId(randomUUID());
+    });
+
+    EventListenerMetadata.from(target as Type<ISequentialEventListener>).assignEvents(events);
   };
-};
-
-export const getListenedEvent = (
-  constructor: Record<string, unknown>,
-): IEventConstructor | undefined => {
-  const listenedEvent = Reflect.getMetadata(
-    SEQUENTIAL_EVENT_LISTENER,
-    constructor,
-  );
-
-  return listenedEvent ?? undefined;
 };

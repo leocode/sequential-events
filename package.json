@@ -9,6 +9,9 @@
     "lint": "eslint src/**/*.ts",
     "test": "jest"
   },
+  "engines": {
+    "node": ">=14.17.0"
+  },
   "types": "./build/index.d.ts",
   "main": "./build/index.js",
   "peerDependencies": {

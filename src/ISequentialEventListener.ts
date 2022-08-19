@@ -1,7 +1,8 @@
-export interface IEvent {}
+export interface IEvent {
+}
 
-export type IEventConstructor = { new(...args: any[]): IEvent; }
+export type EventId = string;
 
-export interface ISequentialEventListener<E extends IEvent = IEvent, T = any> {
-  handle(event: E, tx: T | null): Promise<void>;
+export interface ISequentialEventListener<Event extends IEvent = IEvent, Transaction = any> {
+    handle(event: Event, tx: Transaction | null): Promise<void>;
 }
